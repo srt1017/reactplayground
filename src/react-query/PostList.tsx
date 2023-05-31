@@ -1,34 +1,40 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-
-interface Post {
-  id: number;
-  title: string;
-  body: string;
-  userId: number;
-}
+import { useState } from "react";
+import usePosts from "../routing/hooks/usePosts";
 
 const PostList = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [error, setError] = useState('');
+  const pageSize = 10;
 
-  useEffect(() => {
-    axios
-      .get('https://jsonplaceholder.typicode.com/posts')
-      .then((res) => setPosts(res.data))
-      .catch((error) => setError(error));
-  }, []);
+  const [page, setPage] = useState(1);
 
-  if (error) return <p>{error}</p>;
+  const { data, error, isLoading } = usePosts({ page, pageSize });
+
+  if (isLoading) return <p>Loading...</p>;
+
+  if (error) return <p>{error.message}</p>;
 
   return (
-    <ul className="list-group">
-      {posts.map((post) => (
-        <li key={post.id} className="list-group-item">
-          {post.title}
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul className="list-group">
+        {data?.map((post) => (
+          <li key={post.id} className="list-group-item">
+            {post.title}
+          </li>
+        ))}
+      </ul>
+      <button
+        className="btn btn-primary my-3"
+        disabled={page === 1}
+        onClick={() => setPage(page - 1)}
+      >
+        Previous
+      </button>
+      <button
+        className="btn btn-primary my-3 ms-1 "
+        onClick={() => setPage(page + 1)}
+      >
+        Next
+      </button>
+    </>
   );
 };
 
